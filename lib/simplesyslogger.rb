@@ -1,8 +1,10 @@
+require 'logger'
+require 'syslog'
 require "simplesyslogger/version"
 
 module SimpleSysLogger
 
-  class Logger
+  class SysLogger
 
     attr_reader :level, :ident, :options, :facility
 
@@ -15,13 +17,11 @@ module SimpleSysLogger
       Logger::UNKNOWN => "alert"
     }
 
-
-    def initialize(ident = $0, options = Syslog::LOG_PID | Syslog::LOG_CONS, facility = nil)
-      puts "initialize syslogger"
-      @ident = ident
-      @options = options || (Syslog::LOG_PID | Syslog::LOG_CONS)
-      @level = Logger::INFO
-      @facility = @facility
+    def initialize(opts = {})
+      @ident = opts[:ident] || $0
+      @options = opts[:options] || (Syslog::LOG_PID | Syslog::LOG_CONS)
+      @level = opts[:level]|| Logger::INFO
+      @facility = opts[:facility] || Syslog::LOG_LOCAL0
     end
 
 
@@ -58,7 +58,7 @@ module SimpleSysLogger
     # +progname+:: optionally, overwrite the program name that appears in the log message.
     def add(severity, message = nil, progname = nil, &block)
       formatted_communication = "=====> #{MAPPING[severity]} :::: #{message}"
-      Syslog.open(progname ||  @ident, Syslog::LOG_PID | Syslog::LOG_CONS) { |s|
+      Syslog.open(progname ||  @ident, @options) { |s|
         puts "#{MAPPING[severity]}  ..... logger:::: #{formatted_communication}"
         #s.warning "logger:::: #{formatted_communication}"
         s.send("#{MAPPING[severity]}".to_sym, formatted_communication)

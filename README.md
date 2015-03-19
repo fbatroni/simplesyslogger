@@ -21,8 +21,11 @@ Or install it yourself as:
 Example usage in sinatra:
 
 configure do
-	log = SimpleSysLogger::Logger.new("MY_COOL_APP", Syslog::LOG_PID, Syslog::LOG_LOCAL0)
-	TODO:// # logging level - i.e. send messages that are at least of the Logger::INFO level - not fully implemented yet
+	log = SimpleSysLogger::SysLogger.new({
+	    :ident => "MY_COOL_APPNAME",
+	    :level => Logger::DEBUG #TODO:// # logging level - i.e. send messages that are at least of the Logger::INFO level - not fully implemented yet
+	    })
+
 	log.level = ENV['RACK_ENV'] == 'production' ? Logger::INFO : Logger::DEBUG
 end
 
